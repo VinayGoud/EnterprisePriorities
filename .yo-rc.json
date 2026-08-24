@@ -1,0 +1,18 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "21.2.0",
+    "sdksVersions": {},
+    "version": "1.21.1",
+    "libraryName": "enterprise-priorities",
+    "libraryId": "2a760b12-7f63-48b5-8849-6b285204fbb2",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "enterprise-priorities",
+    "solutionShortDescription": "enterprise-priorities description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

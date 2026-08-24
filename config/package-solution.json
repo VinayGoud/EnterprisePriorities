@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "enterprise-priorities-client-side-solution",
+    "id": "2a760b12-7f63-48b5-8849-6b285204fbb2",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.21.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "enterprise-priorities description"
+      },
+      "longDescription": {
+        "default": "enterprise-priorities description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "enterprise-priorities Feature",
+        "description": "The feature that activates elements of the enterprise-priorities solution.",
+        "id": "d29244ea-fb95-486b-b5b7-fa29743094f5",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/enterprise-priorities.sppkg"
+  }
+}

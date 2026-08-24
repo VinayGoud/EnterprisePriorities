@@ -1,0 +1,141 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.enterprisePropertiesWp {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+
+  &.teams {
+    font-family: $ms-font-family-fallbacks;
+  }
+}
+
+.enterprisePrioritiesWp {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  position: relative;
+  padding-bottom: 12px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 48px;
+    height: 3px;
+    background-color: #c00;
+  }
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.priorityCard {
+  width: 100%;
+  min-width: 0; // allows the card to shrink below its content size instead of overflowing
+  height: 190px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 18px;
+  text-decoration: none;
+  color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  // Three color variants, cycled by card index to match the approved mockup
+  &.variant0 {
+    background: linear-gradient(160deg, #b0281f 0%, #5c0e0e 100%);
+  }
+
+  &.variant1 {
+    background: linear-gradient(160deg, #4a4a4a 0%, #232323 100%);
+  }
+
+  &.variant2 {
+    background: linear-gradient(160deg, #5c1a1a 0%, #2a0d0d 100%);
+  }
+}
+
+.cardIconBox {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+}
+
+.cardIconImg {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.cardArrow {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 17px;
+  margin: 0 0 8px 0;
+}
+
+.cardDescription {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.emptyState {
+  padding: 16px;
+  color: #605e5c;
+  font-style: italic;
+}
+
+// Mobile: stack cards in a single column instead of squeezing 3 across
+@media (max-width: 480px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .priorityCard {
+    height: auto;
+    min-height: 160px;
+  }
+}
