@@ -1,141 +1,157 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
-.enterprisePropertiesWp {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
-  }
-}
-
 .enterprisePrioritiesWp {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
 }
 
 .sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 4px 0;
+  padding: 0;
   font-size: 22px;
   font-weight: 700;
-  margin: 0 0 4px 0;
-  position: relative;
-  padding-bottom: 12px;
+  line-height: 1.2;
+  color: #000000;
 
   &::after {
     content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 48px;
     height: 3px;
-    background-color: #c00;
+    flex-shrink: 0;
+    background-color: #d10411;
   }
 }
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 255.33px));
   gap: 16px;
   width: 100%;
 }
 
 .priorityCard {
-  width: 100%;
-  min-width: 0; // allows the card to shrink below its content size instead of overflowing
-  height: 190px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  padding: 18px;
-  text-decoration: none;
-  color: #fff;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 240px;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 12px;
+  color: #ffffff;
+  text-decoration: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
+    color: #ffffff;
+    text-decoration: none;
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   }
 
-  // Three color variants, cycled by card index to match the approved mockup
-  &.variant0 {
-    background: linear-gradient(160deg, #b0281f 0%, #5c0e0e 100%);
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: -4px;
   }
+}
 
-  &.variant1 {
-    background: linear-gradient(160deg, #4a4a4a 0%, #232323 100%);
-  }
-
-  &.variant2 {
-    background: linear-gradient(160deg, #5c1a1a 0%, #2a0d0d 100%);
-  }
+.cardContent {
+  position: absolute;
+  top: 96px;
+  left: 24px;
+  right: 24px;
 }
 
 .cardIconBox {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.15);
+  top: 24px;
+  left: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .cardIconImg {
-  width: 20px;
-  height: 20px;
+  display: block;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
-.cardArrow {
+.cardIconGlyph {
+  display: flex;
+  font-size: 20px;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.newBadge {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 16px;
-  opacity: 0.85;
+  top: 24px;
+  right: 24px;
+  padding: 5px 16px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  color: #4b4b4b;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.5px;
 }
 
 .cardTitle {
-  font-weight: 700;
-  font-size: 17px;
+  display: -webkit-box;
   margin: 0 0 8px 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .cardDescription {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
   font-size: 13px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
+  color: rgba(255, 255, 255, 0.9);
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
-.emptyState {
-  padding: 16px;
-  color: #605e5c;
-  font-style: italic;
+@media (max-width: 900px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 255.33px));
+  }
 }
 
-// Mobile: stack cards in a single column instead of squeezing 3 across
 @media (max-width: 480px) {
+  .sectionTitle {
+    font-size: 20px;
+  }
+
   .cardGrid {
     grid-template-columns: 1fr;
   }
 
   .priorityCard {
-    height: auto;
-    min-height: 160px;
+    width: 100%;
+    height: 240px;
   }
 }

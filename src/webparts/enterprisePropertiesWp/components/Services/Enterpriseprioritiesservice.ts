@@ -1,101 +1,139 @@
-import { spfi, SPFI, SPFx } from "@pnp/sp";
-import "@pnp/sp/webs";
-import "@pnp/sp/lists";
-import "@pnp/sp/items";
-import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { spfi, SPFI, SPFx } from '@pnp/sp';
+import '@pnp/sp/webs';
+import '@pnp/sp/lists';
+import '@pnp/sp/items';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 export interface IPriorityCard {
   Id: number;
   Title: string;
   Description: string;
-  Link: string;
-  Icon: string; // URL to an image, uploaded by the editor to a SharePoint document library
-  Active: boolean;
+  URL: string;
   DisplayOrder: number;
-  StartDate: string | undefined;
-  EndDate: string | undefined;
+  Active: boolean;
+  BackgroundColor: string;
+  Icon: string;
+  IconURL: string;
+  PublishingStartDate?: string;
+  PublishingEndDate?: string;
+  ShowNewLabel: boolean;
+  NewLabelStartDate?: string;
+  NewLabelEndDate?: string;
+  IsNew: boolean;
 }
 
 interface IRawPriorityListItem {
   Id: number;
   Title: string;
   Description: string;
-  Link: { Url: string } | string | undefined;
-  IconUrl: { Url: string } | string | undefined;
-  Active: boolean;
+  URL: { Url: string } | string | undefined;
   DisplayOrder: number;
-  StartDate: string | undefined;
-  EndDate: string | undefined;
+  Active: boolean;
+  BackgroundColor: string;
+  Icon: string;
+  IconURL: { Url: string } | string | undefined;
+  PublishingStartDate?: string;
+  PublishingEndDate?: string;
+  ShowNewLabel: boolean;
+  NewLabelStartDate?: string;
+  NewLabelEndDate?: string;
 }
 
-const LIST_NAME = "EnterprisePriorities";
-const MAX_VISIBLE_CARDS = 3; // confirmed: "three visible cards unless changed"
+const LIST_NAME = 'EnterprisePriorities';
+const MAX_VISIBLE_CARDS = 3;
 
 export class EnterprisePrioritiesService {
   private sp: SPFI;
 
   constructor(context: WebPartContext) {
     this.sp = spfi().using(SPFx(context));
-    // NOTE: if your project already has a shared spfi() setup (like FeedbackService.ts),
-    // prefer reusing that pattern instead of re-initializing here for consistency.
   }
 
-  /**
-   * Returns up to MAX_VISIBLE_CARDS active priority cards, sorted by DisplayOrder.
-   * Icon is read from the IconUrl column — editors upload the image to a
-   * SharePoint document library first, then paste that file's URL into this column.
-   *
-   * NOTE: "Active eq 1" filter syntax is unverified for this environment —
-   * same open question flagged on MyToolsService.ts. Test against real data;
-   * may need to be "Active eq true" depending on PnPjs/REST behavior here.
-   */
   public async getActivePriorityCards(): Promise<IPriorityCard[]> {
     try {
       const items: IRawPriorityListItem[] = await this.sp.web.lists
         .getByTitle(LIST_NAME)
         .items.select(
-          "Id",
-          "Title",
-          "Description",
-          "Link",
-          "IconUrl",
-          "Active",
-          "DisplayOrder",
-          "StartDate",
-          "EndDate"
+          'Id',
+          'Title',
+          'Description',
+          'URL',
+          'DisplayOrder',
+          'Active',
+          'BackgroundColor',
+          'Icon',
+          'IconURL',
+          'PublishingStartDate',
+          'PublishingEndDate',
+          'ShowNewLabel',
+          'NewLabelStartDate',
+          'NewLabelEndDate'
         )
-        .filter("Active eq 1")
-        .orderBy("DisplayOrder", true)
-        .top(MAX_VISIBLE_CARDS)();
+        .filter('Active eq 1')
+        .orderBy('DisplayOrder', true)();
 
-      return items.map((item) => {
-        const linkValue =
-          typeof item.Link === "object" && item.Link !== null
-            ? item.Link.Url
-            : (item.Link as string) ?? "";
+      const currentDate = new Date();
 
-        const iconValue =
-          typeof item.IconUrl === "object" && item.IconUrl !== null
-            ? item.IconUrl.Url
-            : (item.IconUrl as string) ?? "";
+      return items
+        .filter((item) => {
+          const startDate = item.PublishingStartDate
+            ? new Date(item.PublishingStartDate)
+            : undefined;
 
-        return {
-          Id: item.Id,
-          Title: item.Title,
-          Description: item.Description,
-          Link: linkValue,
-          Icon: iconValue,
-          Active: item.Active,
-          DisplayOrder: item.DisplayOrder,
-          StartDate: item.StartDate,
-          EndDate: item.EndDate,
-        };
-      });
+          const endDate = item.PublishingEndDate
+            ? new Date(item.PublishingEndDate)
+            : undefined;
+
+          const isStarted = !startDate || currentDate >= startDate;
+          const isNotExpired = !endDate || currentDate <= endDate;
+
+          return isStarted && isNotExpired;
+        })
+        .slice(0, MAX_VISIBLE_CARDS)
+        .map((item) => {
+          const url =
+            typeof item.URL === 'object' && item.URL !== null
+              ? item.URL.Url
+              : item.URL || '';
+
+          const iconUrl =
+            typeof item.IconURL === 'object' && item.IconURL !== null
+              ? item.IconURL.Url
+              : item.IconURL || '';
+
+          const newLabelStartDate = item.NewLabelStartDate
+            ? new Date(item.NewLabelStartDate)
+            : undefined;
+
+          const newLabelEndDate = item.NewLabelEndDate
+            ? new Date(item.NewLabelEndDate)
+            : undefined;
+
+          const isNew =
+            item.ShowNewLabel &&
+            (!newLabelStartDate || currentDate >= newLabelStartDate) &&
+            (!newLabelEndDate || currentDate <= newLabelEndDate);
+
+          return {
+            Id: item.Id,
+            Title: item.Title,
+            Description: item.Description,
+            URL: url,
+            DisplayOrder: item.DisplayOrder,
+            Active: item.Active,
+            BackgroundColor: item.BackgroundColor,
+            Icon: item.Icon,
+            IconURL: iconUrl,
+            PublishingStartDate: item.PublishingStartDate,
+            PublishingEndDate: item.PublishingEndDate,
+            ShowNewLabel: item.ShowNewLabel,
+            NewLabelStartDate: item.NewLabelStartDate,
+            NewLabelEndDate: item.NewLabelEndDate,
+            IsNew: isNew
+          };
+        });
     } catch (error) {
-      console.error("Error fetching Enterprise Priority cards:", error);
-      // Per BRD error/empty states: "no active cards" should render a defined
-      // empty state in the UI, not throw — returning [] lets the component
-      // handle that state.
+      console.error('Error fetching Enterprise Priority cards:', error);
       return [];
     }
   }

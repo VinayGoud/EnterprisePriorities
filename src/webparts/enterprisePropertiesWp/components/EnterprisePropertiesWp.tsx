@@ -1,112 +1,96 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Icon } from '@fluentui/react';
-import styles from './EnterprisePropertiesWp.module.scss';
-import { IEnterprisePropertiesWpProps } from './IEnterprisePropertiesWpProps';
-import { EnterprisePrioritiesService, IPriorityCard } from './Services/Enterpriseprioritiesservice';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import styles from "./EnterprisePropertiesWp.module.scss";
+import { IEnterprisePropertiesWpProps } from "./IEnterprisePropertiesWpProps";
+import {
+  EnterprisePrioritiesService,
+  IPriorityCard,
+} from "./Services/Enterpriseprioritiesservice";
 
-const getCardUrl = (link?: string): string => {
-  if (!link) {
-    return '#';
-  }
-
-  try {
-    const url = new URL(link, window.location.origin);
-    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '#';
-  } catch {
-    return '#';
-  }
-};
-
-// Cycles through 3 approved color variants regardless of how many cards exist
-const getVariantClass = (index: number, styleMap: { [key: string]: string }): string => {
-  const variants = [styleMap.variant0, styleMap.variant1, styleMap.variant2];
-  return variants[index % variants.length];
-};
-
-const EnterprisePrioritiesWp: React.FC<IEnterprisePropertiesWpProps> = (props) => {
+const EnterprisePropertiesWp: React.FC<IEnterprisePropertiesWpProps> = (
+  props,
+) => {
   const [cards, setCards] = useState<IPriorityCard[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const service = React.useMemo(
-    () => new EnterprisePrioritiesService(props.context),
-    [props.context]
-  );
-
   useEffect(() => {
-    let isMounted = true;
+    const loadPriorityCards = async (): Promise<void> => {
+      try {
+        const service = new EnterprisePrioritiesService(props.context);
+        const priorityCards = await service.getActivePriorityCards();
 
-    const loadCards = async (): Promise<void> => {
-      const result = await service.getActivePriorityCards();
-      if (isMounted) {
-        setCards(result);
+        setCards(priorityCards);
+      } catch (error) {
+        console.error("Error loading Enterprise Priority cards:", error);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    loadCards().catch((error) => {
-      console.error('Failed to load priority cards:', error);
-      if (isMounted) {
-        setIsLoading(false);
-      }
+    loadPriorityCards().catch((error) => {
+      console.error("Error loading Enterprise Priority cards:", error);
     });
+  }, [props.context]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [service]);
+  const getBackgroundColor = (backgroundColor: string): string => {
+    switch (backgroundColor) {
+      case "Red":
+        return "linear-gradient(160deg, #D21723 0%, #36090C 100%)";
 
-  // ---- Render: loading ----
-  if (isLoading) {
-    return <div className={styles.enterprisePrioritiesWp}>Loading...</div>;
+      case "Dark Gray":
+        return "linear-gradient(160deg, #202024 0%, #58585F 100%)";
+
+      case "Dark Red":
+        return "linear-gradient(160deg, #66070E 0%, #36090C 100%)";
+
+      default:
+        return "linear-gradient(160deg, #D21723 0%, #36090C 100%)";
+    }
+  };
+
+  if (isLoading || cards.length === 0) {
+    return null;
   }
 
-  // ---- Render: empty state (per BRD error/empty states: "no active cards") ----
-  if (cards.length === 0) {
-    return (
-      <div className={styles.enterprisePrioritiesWp}>
-        <h2 className={styles.sectionTitle}>Enterprise Priorities</h2>
-        <div className={styles.emptyState}>No enterprise priorities to display right now.</div>
-      </div>
-    );
-  }
-
-  // ---- Render: cards ----
   return (
-    <div className={styles.enterprisePrioritiesWp}>
+    <section className={styles.enterprisePrioritiesWp}>
       <h2 className={styles.sectionTitle}>Enterprise Priorities</h2>
+
       <div className={styles.cardGrid}>
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <a
             key={card.Id}
-            className={`${styles.priorityCard} ${getVariantClass(index, styles)}`}
-            href={getCardUrl(card.Link)}
+            className={styles.priorityCard}
+            style={{
+              background: getBackgroundColor(card.BackgroundColor),
+            }}
+            href={card.URL}
             target="_blank"
             rel="noopener noreferrer"
+            data-interception="off"
           >
-            <span className={styles.cardIconBox}>
-              {/*
-                Icon comes directly from the SharePoint list's "Icon" column,
-                expected to hold a Fluent UI icon name (e.g. "Compass", "Trophy", "Heart").
-                Falls back to a generic icon if the field is empty or the name is invalid.
-                NOTE: this assumes Fluent UI icon names as the storage format -- confirm
-                this matches the "Icons/visuals" BRD decision once it's resolved; if editors
-                will instead upload custom icon images, this will need to switch to an <img> tag.
-              */}
-         {card.Icon ? (
-<img className={styles.cardIconImg} src={card.Icon} alt="" />
-) : (
-  <Icon iconName="Info" aria-hidden="true" />
-)}
-            </span>
-            <span className={styles.cardArrow} aria-hidden="true">&#8594;</span>
-            <h3 className={styles.cardTitle}>{card.Title}</h3>
-            <p className={styles.cardDescription}>{card.Description}</p>
+            {card.IconURL && (
+              <span className={styles.cardIconBox}>
+                <img className={styles.cardIconImg} src={card.IconURL} alt="" />
+              </span>
+            )}
+
+            {card.IsNew && <span className={styles.newBadge}>NEW</span>}
+
+            <div className={styles.cardContent}>
+              <h3 className={styles.cardTitle} title={card.Title}>
+                {card.Title}
+              </h3>
+
+              <p className={styles.cardDescription} title={card.Description}>
+                {card.Description}
+              </p>
+            </div>
           </a>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
-export default EnterprisePrioritiesWp;
+export default EnterprisePropertiesWp;
